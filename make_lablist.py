@@ -6,7 +6,7 @@ import pandas as pd
 
 import utils
 
-NUM_INTERMEDIATE_LAYES = 3  # 大学院 -> (intermediates) -> 研究室
+NUM_INTERMEDIATE_LAYES = 3
 
 grads = [
     # Tier 1
@@ -76,6 +76,7 @@ def make_lab_list(output_dir: str, model_name: str):
 
     for grad_name, grad_url in grads:
         print(f"Searching {grad_name} on {grad_url} ...")
+        visited = {grad_url}
         input_tokens, output_tokens = 0, 0
 
         # Init tables
@@ -107,17 +108,17 @@ def make_lab_list(output_dir: str, model_name: str):
 
         while dq:
             node: Node = dq.popleft()
-
-            depth, url = node.depth(), node.url()
-            if url is None:
+            url = node.url()
+            if url is None or url in visited:
                 continue
 
             with open("prompts/02_intermediate.md") as f:
                 query = f.read()
                 query = query.format(faculty=node.fullname(), url=url)
-                # print(query, "\n\n")
 
             resp = utils.search_website(query, url, model_name=model_name)
+            visited.add(url)
+
             if resp is None:
                 continue
 
@@ -125,24 +126,25 @@ def make_lab_list(output_dir: str, model_name: str):
             output_tokens += resp.usage.output_tokens
 
             resp_text = resp.output_text.strip()
-            # print(resp_text, "\n\n")
 
             if resp_text.startswith("0"):
-                # Neither member list nor laboratory/field list was found
+                # No lists exist for field, laboratory, or members
                 pass
 
             elif resp_text.startswith("1"):
-                # Members list exists - add to table
+                # Members list exists - add node to table
                 data.append(node.row()[1:])
                 if len(data) % 100 == 0:
                     print(f"    {len(data)} laboratories found.")
 
-            elif resp_text.startswith("2"):
-                # Laboratory/Field list exists - add to intermediate table
+            else:
+                # Subfield or laboratory list exists
                 intermediate.append(node.row()[1:])
 
                 # Parse CSV lines
                 lines = resp_text.split("\n")
+                if len(lines) < 2:
+                    continue
                 for line in lines[1:]:
                     line = line.strip()
                     if line:
@@ -151,11 +153,21 @@ def make_lab_list(output_dir: str, model_name: str):
                             new_name, new_url = parts[0].strip(), parts[1].strip()
                             if new_url == "NA":
                                 new_url = None
+
                             new_node: Node = node.child(new_name, new_url)
-                            if depth < NUM_INTERMEDIATE_LAYES:
-                                dq.append(new_node)
-                            else:
-                                intermediate.append(new_node.row()[1:])
+
+                            if resp_text.startswith("2"):
+                                # Subfield
+                                if node.depth() < NUM_INTERMEDIATE_LAYES:
+                                    dq.append(new_node)
+                                else:
+                                    intermediate.append(new_node.row()[1:])
+
+                            elif resp_text.startswith("3"):
+                                # Laboratory
+                                data.append(new_node.row()[1:])
+                                if len(data) % 100 == 0:
+                                    print(f"    {len(data)} laboratories found.")
 
         # Output CSV files for each depth
         cols = ["大学院", "研究科", "分野1", "分野2", "研究室", "URL"]

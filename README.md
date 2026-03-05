@@ -34,3 +34,13 @@ uv run src/make_lablist.py
 個々のタスクは単純なので、ローカル言語モデル + [ddgs](https://github.com/deedy5/ddgs) でゼロコスト化してみたい。[Qwen 3.5 9B](https://huggingface.co/Qwen/Qwen3.5-9B) を検討中。
 
 おそらく時間がかかるため、うまく分割処理したい。
+
+### 補足：`while dq` は停止する
+
+- `depth = 0` の `Node` で初期化
+- `resp_text` は 0/1/2 で始まる
+  - 0,1 のとき dq には追加しない
+  - 2 のとき `new_node` は `node` より `depth` が 1 大きい
+- `depth == NUM_INTERMEDIATE_LAYES` のとき `new_node` は append されない
+
+➡︎ `while dq` は停止する。
