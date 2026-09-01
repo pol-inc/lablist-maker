@@ -27,19 +27,25 @@ uv run src/make_lablist.py
 
 使用モデルは `gpt-5-nano` です。2026-03 現在、OpenAI API からウェブ探索が利用できる最廉価モデルです（詳細：[OpenAI Model Pricing](https://developers.openai.com/api/docs/pricing)）
 
-東京大学大学院に対し、`make_lablist.py` の消費トークンおよび料金例は以下の通りです（数値は変動します）。
+以下は東京大学大学院に対して `make_lablist.py` を叩いた際のコストの一例です（数値は変動します）。
+
+```txt
+  Total input  tokens: 4725012
+  Total output tokens: 880789
+  Total cost (gpt-5-nano): $0.5886
+```
+
+所要時間は 3 時間程度です。
 
 ### (memo)
 
-個々のタスクは単純なので、ローカル言語モデル + [ddgs](https://github.com/deedy5/ddgs) でゼロコスト化してみたい。[Qwen 3.5 9B](https://huggingface.co/Qwen/Qwen3.5-9B) を検討中。
-
-おそらく時間がかかるため、うまく分割処理したい。
+個々のタスクは単純なので、ローカル LM + [ddgs](https://github.com/deedy5/ddgs) でゼロコスト化してみたい。[Qwen 3.5 9B](https://huggingface.co/Qwen/Qwen3.5-9B) を検討中。うまく分割処理したい。
 
 ### 補足：`while dq` は停止する
 
 - `depth = 0` の `Node` で初期化
-- `resp_text` は 0/1/2 で始まる
-  - 0,1 のとき dq には追加しない
+- `resp_text` は 0/1/2/3 で始まる
+  - 0,1,3 のとき dq に何も追加しない
   - 2 のとき `new_node` は `node` より `depth` が 1 大きい
 - `depth == NUM_INTERMEDIATE_LAYES` のとき `new_node` は append されない
 

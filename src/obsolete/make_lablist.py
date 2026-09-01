@@ -4,7 +4,7 @@ from collections import deque
 
 import pandas as pd
 
-import utils
+from src import utils
 
 NUM_INTERMEDIATE_LAYES = 3
 

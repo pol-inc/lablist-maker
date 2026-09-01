@@ -1,4 +1,4 @@
-from make_lablist import Node
+from src.obsolete.make_lablist import Node
 
 # Create root node
 n = Node(0, "Grad", None, None, None, "Faculty", "http://example")

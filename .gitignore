@@ -12,3 +12,6 @@ wheels/
 
 output/*/
 data/
+
+*.ipynb
+.ipynb_checkpoints

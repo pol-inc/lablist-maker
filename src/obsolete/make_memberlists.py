@@ -4,7 +4,7 @@ import os
 import pandas as pd
 from tqdm import tqdm
 
-import utils
+from src import utils
 
 model_name = "gpt-5-nano"
 
