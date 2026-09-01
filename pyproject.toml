@@ -5,13 +5,10 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "ddgs>=9.11.1",
-    "ollama>=0.6.1",
-    "openai>=2.15.0",
     "pandas>=3.0.0",
-    "tldextract>=5.3.1",
-    "trafilatura>=2.0.0",
 ]
 
 [dependency-groups]
-dev = []
+dev = [
+    "openpyxl>=3.1.5",
+]
