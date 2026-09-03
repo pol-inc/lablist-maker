@@ -1,52 +1,21 @@
-# Lab List Maker
+# Campus Tree
 
-大学院ウェブサイトを根ノードとし（`depth = 0`）、「大学院 ➡︎ 研究科 ➡︎ 専攻分野 ➡︎ 研究室」の順に幅優先探索して、研究室のリストを作成します (`MAX_DEPTH = 3`)。ただし研究室は必ずしも左の組織構造を取りません。
+[大学基本情報 2025（R7）](https://portal.niad.ac.jp/ptrt/r07.html) に基づく国公立大学の修士課程・博士課程の学生の統計、および各大学院・研究科に在籍する LabBase ユーザーの可視化ツール。
 
-また各研究室ウェブサイトから修士・博士課程の学生の名簿を探索します（開発中）。
-
-## 準備
-
-- 環境変数 `OPENAI_API_KEY`
-- [uv](https://docs.astral.sh/uv/) 導入
-
-## 実行
+## 起動
 
 ```sh
-git clone git@github.com:pol-inc/lablist-maker.git
-cd lablist-maker
-uv sync
-uv run src/make_lablist.py
-# 開発中： uv run src/make_memberlist.py
+npm install
+npm run build
+uv run tree
 ```
 
-ファイルが `output/(today)/` に出力されます。
+ブラウザで <http://127.0.0.1:8000> を開く。
 
-追加作成したい大学院がある場合は `make_lablist.py` の `grads` を編集してください。
+### 開発者向け
 
-## コスト
-
-使用モデルは `gpt-5-nano` です。2026-03 現在、OpenAI API からウェブ探索が利用できる最廉価モデルです（詳細：[OpenAI Model Pricing](https://developers.openai.com/api/docs/pricing)）
-
-以下は東京大学大学院に対して `make_lablist.py` を叩いた際のコストの一例です（数値は変動します）。
-
-```txt
-  Total input  tokens: 4725012
-  Total output tokens: 880789
-  Total cost (gpt-5-nano): $0.5886
+```sh
+npm run dev
 ```
 
-所要時間は 3 時間程度です。
-
-### (memo)
-
-個々のタスクは単純なので、ローカル LM + [ddgs](https://github.com/deedy5/ddgs) でゼロコスト化してみたい。[Qwen 3.5 9B](https://huggingface.co/Qwen/Qwen3.5-9B) を検討中。うまく分割処理したい。
-
-### 補足：`while dq` は停止する
-
-- `depth = 0` の `Node` で初期化
-- `resp_text` は 0/1/2/3 で始まる
-  - 0,1,3 のとき dq に何も追加しない
-  - 2 のとき `new_node` は `node` より `depth` が 1 大きい
-- `depth == NUM_INTERMEDIATE_LAYES` のとき `new_node` は append されない
-
-➡︎ `while dq` は停止する。
+ブラウザで <http://127.0.0.1:5173> を開く。UI 変更等が即時反映される。
